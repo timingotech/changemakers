@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   Heart,
   Users,
@@ -20,14 +20,47 @@ import {
   Award,
   Sprout,
   Book,
-  Coffee
+  Coffee,
+  MapPinned
+
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Response1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      setScrolled(offset > 50);
+      setShowScrollTop(offset > 400);
+
+      const sections = ['causes', 'impact', 'join'];
+      sections.forEach(section => {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 100 && rect.bottom >= 100) {
+            setActiveSection(section);
+          }
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
   const causes = [
     {
       title: "Environmental Conservation",
@@ -72,24 +105,54 @@ const Response1 = () => {
     { month: 'Jun', impact: 6000 }
   ];
 
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMenuOpen(false);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navigation */}
-      <nav className="fixed w-full bg-white shadow-sm z-50">
+      <nav className={`fixed w-full z-50 transition-all duration-300 ${
+        scrolled ? 'bg-white/95 backdrop-blur-sm shadow-lg' : 'bg-transparent'
+      }`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <Globe className="w-6 h-6 text-blue-600" />
-              <span className="text-xl font-bold">ChangeMakers</span>
+              <Globe className={`w-6 h-6 transition-colors duration-300 ${
+                scrolled ? 'text-blue-600' : 'text-white'
+              }`} />
+              <span className={`text-xl font-bold transition-colors duration-300 ${
+                scrolled ? 'text-gray-800' : 'text-white'
+              }`}>Terntribe BUILD Demo</span>
             </div>
             
             <div className="hidden md:flex space-x-8">
-              <a href="#causes" className="text-gray-600 hover:text-blue-600">Causes</a>
-              <a href="#impact" className="text-gray-600 hover:text-blue-600">Impact</a>
-              <a href="#join" className="text-gray-600 hover:text-blue-600">Join Us</a>
+              {['causes', 'impact', 'join'].map((section) => (
+                <button
+                  key={section}
+                  onClick={() => scrollToSection(section)}
+                  className={`relative transition-colors duration-300 ${
+                    scrolled ? 'text-gray-600 hover:text-blue-600' : 'text-white hover:text-blue-200'
+                  }`}
+                >
+                  <span className="capitalize">{section}</span>
+                  {activeSection === section && (
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform origin-left transition-transform duration-300" />
+                  )}
+                </button>
+              ))}
             </div>
 
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden">
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`md:hidden transition-colors duration-300 ${
+                scrolled ? 'text-gray-600' : 'text-white'
+              }`}
+            >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -97,68 +160,47 @@ const Response1 = () => {
       </nav>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="fixed top-16 left-0 right-0 bg-white shadow-lg md:hidden z-40">
-          <div className="px-4 py-2 space-y-2">
-            <a href="#causes" className="block py-2">Causes</a>
-            <a href="#impact" className="block py-2">Impact</a>
-            <a href="#join" className="block py-2">Join Us</a>
-          </div>
+      <div 
+        className={`fixed top-16 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-lg md:hidden transform transition-transform duration-300 ease-in-out ${
+          isMenuOpen ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <div className="px-4 py-2 space-y-2">
+          {['causes', 'impact', 'join'].map((section) => (
+            <button
+              key={section}
+              onClick={() => scrollToSection(section)}
+              className="block w-full py-2 text-left text-gray-600 hover:text-blue-600 transition-colors duration-300"
+            >
+              <span className="capitalize">{section}</span>
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Hero Section */}
       <section className="pt-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="container mx-auto px-4 py-20">
           <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="md:w-1/2 space-y-6">
+            <div className="md:w-1/2 space-y-6 transform transition-all duration-700 hover:scale-105">
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                 Make a Difference Today
               </h1>
               <p className="text-xl opacity-90">
-                Join our global community of changemakers working together for a better world.
+                Join our global community of Terntribe BUILD Demo working together for a better world.
               </p>
               <div className="flex space-x-4">
-                <button className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center space-x-2">
+                <button className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-300 hover:scale-105 flex items-center space-x-2">
                   <Heart className="w-5 h-5" />
                   <span>Join Us</span>
                 </button>
-                <button className="px-6 py-3 border border-white rounded-lg hover:bg-white/10 transition-colors">
+                <button className="px-6 py-3 border border-white rounded-lg hover:bg-white/10 transition-all duration-300 hover:scale-105">
                   Learn More
                 </button>
               </div>
             </div>
             <div className="md:w-1/2 mt-8 md:mt-0">
-              <Globe className="w-64 h-64 mx-auto text-white/20" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-12 bg-blue-50">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex items-center space-x-4 justify-center">
-              <Users className="w-8 h-8 text-blue-600" />
-              <div>
-                <div className="text-3xl font-bold text-blue-600">100K+</div>
-                <div className="text-gray-600">Lives Impacted</div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 justify-center">
-              <DollarSign className="w-8 h-8 text-blue-600" />
-              <div>
-                <div className="text-3xl font-bold text-blue-600">$2.5M</div>
-                <div className="text-gray-600">Funds Raised</div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 justify-center">
-              <MapPin className="w-8 h-8 text-blue-600" />
-              <div>
-                <div className="text-3xl font-bold text-blue-600">50+</div>
-                <div className="text-gray-600">Countries Reached</div>
-              </div>
+              <Globe className="w-64 h-64 mx-auto text-white/20 animate-pulse" />
             </div>
           </div>
         </div>
@@ -170,8 +212,11 @@ const Response1 = () => {
           <h2 className="text-3xl font-bold text-center mb-12">Our Causes</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {causes.map((cause, index) => (
-              <div key={index} className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4 mx-auto">
+              <div 
+                key={index} 
+                className="bg-white rounded-lg p-6 shadow-lg transform transition-all duration-500 hover:scale-105 hover:shadow-xl"
+              >
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4 mx-auto transform transition-transform hover:rotate-12">
                   {cause.icon}
                 </div>
                 <h3 className="text-xl font-bold text-center mb-2">{cause.title}</h3>
@@ -200,14 +245,20 @@ const Response1 = () => {
       <section id="impact" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Our Impact</h2>
-          <div className="h-80 w-full">
+          <div className="h-80 w-full transform transition-all duration-500 hover:scale-105">
             <ResponsiveContainer>
               <LineChart data={impactData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="impact" stroke="#2563eb" strokeWidth={2} />
+                <Line 
+                  type="monotone" 
+                  dataKey="impact" 
+                  stroke="#2563eb" 
+                  strokeWidth={2}
+                  animationDuration={2000}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -218,31 +269,31 @@ const Response1 = () => {
       <section id="join" className="py-20">
         <div className="container mx-auto px-4 max-w-md">
           <h2 className="text-3xl font-bold text-center mb-8">Join Our Cause</h2>
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-lg shadow-lg p-8 transform transition-all duration-500 hover:shadow-xl">
             <form className="space-y-6">
-              <div>
+              <div className="transform transition-all duration-300 hover:translate-x-2">
                 <input
                   type="text"
                   placeholder="Your Name"
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all duration-300"
                 />
               </div>
-              <div>
+              <div className="transform transition-all duration-300 hover:translate-x-2">
                 <input
                   type="email"
                   placeholder="Your Email"
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all duration-300"
                 />
               </div>
-              <div>
-                <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+              <div className="transform transition-all duration-300 hover:translate-x-2">
+                <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all duration-300">
                   <option value="">Select a cause</option>
                   {causes.map((cause, index) => (
                     <option key={index} value={cause.title}>{cause.title}</option>
                   ))}
                 </select>
               </div>
-              <button className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+              <button className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg transition-all duration-300 hover:bg-blue-700 hover:scale-105 flex items-center justify-center space-x-2">
                 <Heart className="w-5 h-5" />
                 <span>Join Now</span>
               </button>
@@ -251,35 +302,98 @@ const Response1 = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
+      {/* Enhanced Footer */}
+      <footer className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">Connect With Us</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            {/* Company Info */}
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex items-center space-x-2">
+                <Globe className="w-6 h-6 text-blue-400" />
+                <span className="text-xl font-bold">Terntribe BUILD Demo</span>
+              </div>
+              <p className="text-gray-400">Making positive change in communities worldwide through sustainable initiatives and collective action.</p>
               <div className="flex space-x-4">
-                <Twitter className="w-6 h-6 hover:text-blue-400 cursor-pointer" />
-                <Facebook className="w-6 h-6 hover:text-blue-400 cursor-pointer" />
-                <Instagram className="w-6 h-6 hover:text-blue-400 cursor-pointer" />
-                <Github className="w-6 h-6 hover:text-blue-400 cursor-pointer" />
+                <Twitter className="w-5 h-5 text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-110 cursor-pointer" />
+                <Facebook className="w-5 h-5 text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-110 cursor-pointer" />
+                <Instagram className="w-5 h-5 text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-110 cursor-pointer" />
+                <Github className="w-5 h-5 text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-110 cursor-pointer" />
               </div>
             </div>
-            <div>
-              <h3 className="text-xl font-bold mb-4">Contact Information</h3>
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <Mail className="w-5 h-5 mr-2" />
-                  <span>contact@changemakers.org</span>
+
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Quick Links</h3>
+              <ul className="space-y-2">
+                {['About Us', 'Our Causes', 'Get Involved', 'Donate', 'News'].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-300 flex items-center space-x-2 group">
+                      <ArrowRight className="w-4 h-4 transform group-hover:translate-x-2 transition-transform duration-300" />
+                      <span>{link}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Contact Us</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 group">
+                  <MapPinned className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" />
+                  <span className="text-gray-400 group-hover:text-blue-400 transition-colors duration-300">
+                    17b, Ikeja Road, Lagos, Nigeria
+                  </span>
                 </div>
-                <div className="flex items-center">
-                  <Phone className="w-5 h-5 mr-2" />
-                  <span>+1 (555) 123-4567</span>
+                <div className="flex items-center space-x-3 group">
+                  <Mail className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" />
+                  <span className="text-gray-400 group-hover:text-blue-400 transition-colors duration-300">
+                    contact@terntribebuilddemo.org
+                  </span>
                 </div>
+                <div className="flex items-center space-x-3 group">
+                  <Phone className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" />
+                  <span className="text-gray-400 group-hover:text-blue-400 transition-colors duration-300">
+                    +234 (902) 201-3174
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Newsletter */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Stay Updated</h3>
+              <p className="text-gray-400">Subscribe to our newsletter for the latest updates and news.</p>
+              <div className="flex flex-col space-y-2">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="px-4 py-2 bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all duration-300"
+                />
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300">
+                  Subscribe
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="mt-12 pt-8 border-t border-gray-700">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-gray-400 text-sm">
+                © 2025 Terntribe BUILD Demo. All rights reserved.
+              </p>
+              <div className="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" className="text-gray-400 hover:text-blue-400 text-sm transition-colors duration-300">Privacy Policy</a>
+                <a href="#" className="text-gray-400 hover:text-blue-400 text-sm transition-colors duration-300">Terms of Service</a>
+                <a href="#" className="text-gray-400 hover:text-blue-400 text-sm transition-colors duration-300">Cookie Policy</a>
               </div>
             </div>
           </div>
         </div>
       </footer>
+
     </div>
   );
 };
