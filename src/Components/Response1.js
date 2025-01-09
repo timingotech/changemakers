@@ -162,7 +162,7 @@ const Response1 = () => {
       {/* Mobile Menu */}
       <div 
         className={`fixed top-16 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-lg md:hidden transform transition-transform duration-300 ease-in-out ${
-          isMenuOpen ? 'translate-y-0' : '-translate-y-full'
+          isMenuOpen ? 'translate-y-0' : '-translate-y-[-500%]'
         }`}
       >
         <div className="px-4 py-2 space-y-2">
@@ -349,7 +349,7 @@ const Response1 = () => {
                 <div className="flex items-center space-x-3 group">
                   <Mail className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors duration-300" />
                   <span className="text-gray-400 group-hover:text-blue-400 transition-colors duration-300">
-                    contact@terntribebuilddemo.org
+                    contact@erntribebuilddemo.org
                   </span>
                 </div>
                 <div className="flex items-center space-x-3 group">
